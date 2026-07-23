@@ -1,0 +1,8 @@
+{
+    "name": "toprak/toprak-ai",
+    "description": "Toprak-AI 24/7 Live Deployment",
+    "type": "project",
+    "require": {
+        "php": ">=8.0"
+    }
+}
