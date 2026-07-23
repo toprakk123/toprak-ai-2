@@ -1,3 +1,4 @@
+// güncellendi
 <?php
 // toprak.ai - Saf PHP & Google Gemini API Motoru
 $response_output = "";
@@ -231,3 +232,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 </body>
 </html>
+// güncellendi
