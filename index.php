@@ -1,4 +1,3 @@
-// güncellendi
 <?php
 // toprak.ai - Saf PHP & Google Gemini API Motoru
 $response_output = "";
@@ -24,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         "CFG Ölçeği: " . $cfg_olcegi . "\n" .
                         "Lütfen bu verilere dayanarak istenen çıktıyı en ince detayına kadar üret.";
 
-        // Google Gemini API Payload (gemini-2.5-flash veya gemini-1.5-pro modeli)
         $payload = [
             "contents" => [
                 [
@@ -232,4 +230,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 </body>
 </html>
-// güncellendi
