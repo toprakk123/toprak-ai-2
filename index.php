@@ -1,5 +1,5 @@
 <?php
-// toprak.ai - Saf PHP & Anthropic API Motoru
+// toprak.ai - Saf PHP & Google Gemini API Motoru
 $response_output = "";
 $error_output = "";
 
@@ -12,9 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $cfg_olcegi = trim($_POST['cfg_olcegi']);
 
     if (empty($api_key)) {
-        $error_output = "Anthropic API anahtarı boş bırakılamaz, sevgilim.";
+        $error_output = "Gemini API anahtarı boş bırakılamaz, sevgilim.";
     } else {
-        // Kullanıcı girdilerini ve parametreleri Anthropic modeline gönderilecek formata dönüştürme
         $system_instructions = "Sen toprak.ai'nin arka planındaki metin ve konsept üretim motorusun. Verilen karakter ve fantezi detaylarına uygun, gri oda ve hafif mor neon atmosferini yansıtan detaylı edebi sahneler ve konseptler üretiyorsun.";
         
         $user_content = "Karakter: " . $karakter . "\n" .
@@ -24,26 +23,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         "CFG Ölçeği: " . $cfg_olcegi . "\n" .
                         "Lütfen bu verilere dayanarak istenen çıktıyı en ince detayına kadar üret.";
 
+        // Google Gemini API Payload (gemini-2.5-flash veya gemini-1.5-pro modeli)
         $payload = [
-            "model" => "claude-3-5-sonnet-20241022",
-            "max_tokens" => 2048,
-            "system" => $system_instructions,
-            "messages" => [
+            "contents" => [
                 [
                     "role" => "user",
-                    "content" => $user_content
+                    "parts" => [
+                        ["text" => $system_instructions . "\n\n" . $user_content]
+                    ]
                 ]
             ]
         ];
 
-        $ch = curl_init('https://api.anthropic.com/v1/messages');
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $api_key;
+
+        $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'x-api-key: ' . $api_key,
-            'anthropic-version: 2023-06-01'
+            'Content-Type: application/json'
         ]);
 
         $api_response = curl_exec($ch);
@@ -52,13 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($http_code == 200) {
             $responseData = json_decode($api_response, true);
-            if (isset($responseData['content'][0]['text'])) {
-                $response_output = $responseData['content'][0]['text'];
+            if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+                $response_output = $responseData['candidates'][0]['content']['parts'][0]['text'];
             } else {
                 $error_output = "API yanıtından metin verisi çıkarılamadı.";
             }
         } else {
-            $error_output = "Anthropic API Bağlantı Hatası (HTTP Kod: $http_code): " . htmlspecialchars($api_response);
+            $error_output = "Gemini API Bağlantı Hatası (HTTP Kod: $http_code): " . htmlspecialchars($api_response);
         }
     }
 }
@@ -68,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>toprak.ai - Anthropic PHP Engine</title>
+    <title>toprak.ai - Gemini PHP Engine</title>
     <style>
         body {
             background-color: #121214;
@@ -177,8 +176,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     <form method="POST" action="">
         <div class="form-group">
-            <label for="api_key">Anthropic API Key</label>
-            <input type="text" name="api_key" id="api_key" placeholder="sk-ant-..." required value="<?php echo isset($_POST['api_key']) ? htmlspecialchars($_POST['api_key']) : ''; ?>">
+            <label for="api_key">Gemini API Key</label>
+            <input type="text" name="api_key" id="api_key" placeholder="AIzaSy..." required value="<?php echo isset($_POST['api_key']) ? htmlspecialchars($_POST['api_key']) : ''; ?>">
         </div>
 
         <div class="form-group">
@@ -216,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <input type="range" name="cfg_olcegi" min="1" max="15" step="0.5" value="<?php echo isset($_POST['cfg_olcegi']) ? $_POST['cfg_olcegi'] : '7.5'; ?>" oninput="document.getElementById('cfgVal').innerText = this.value">
         </div>
 
-        <button type="submit">Anthropic ile Üret</button>
+        <button type="submit">Gemini ile Üret</button>
     </form>
 
     <?php if (!empty($error_output)): ?>
